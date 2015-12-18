@@ -1,0 +1,9 @@
+{
+  "name": "ng-config-brunch",
+  "version": "2.0.1",
+  "private": true,
+  "main": "./ng-config.js",
+  "peerDependencies": {
+    "brunch": "~2.0"
+  }
+}
