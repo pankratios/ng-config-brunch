@@ -1,9 +1,19 @@
 {
   "name": "ng-config-brunch",
-  "version": "2.0.1",
+  "version": "2.0.0",
   "private": true,
   "main": "./ng-config.js",
-  "peerDependencies": {
-    "brunch": "~2.0"
+  "dependencies": {
+    "dot": ">=1.0.x"
+  },
+  "devDependencies": {
+    "brunch": ">=2.0.x",
+    "jasmine-node": ">=1.x",
+    "git-release": ">=0.6.x"
+  },
+  "scripts": {
+    "test": "./node_modules/jasmine-node/bin/jasmine-node --test-dir ./",
+    "dev": "npm run test -- --autotest --color --verbose",
+    "release": "./node_modules/git-release/bin/release"
   }
 }
