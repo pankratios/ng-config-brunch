@@ -24,12 +24,12 @@ Import external data through the `imports` section.
 }
 ```
 
-The imported data can be accessed with `$...$` notation.
+The imported data can be accessed with `{{...}}` notation.
 
 ```javascript
 {
-  "packageVersion": "$package.version$"
-  "bowerVersion": "$bower.version$"
+  "packageVersion": "{{package.version}}"
+  "bowerVersion": "{{bower.version}}"
 }
 ```
 
@@ -37,21 +37,25 @@ The imported data can be accessed with `$...$` notation.
 
 Configurations can be overriden per `environment`, `development` is the default.
 
-## Eexample
+## Example
 
 `*.conf.json`
 ```javascript
 {
   "moduleName": "myApp.config",
   "values": {
-    "appName": "App name is $bower.name$",
+    "appName": "App name is {{bower.name}}",
   },
   "constants": {
-    "appVersion": "version $package.version$",
+    "appVersion": "version {{package.version}}",
     "requestTimeout": 3000
   },
-  "production": {
-    "requestTimeout": 1000
+  "overrides": {
+    "production": {
+      "constants": {
+        "requestTimeout": 1000
+      }
+    }
   }
 }
 ```
@@ -74,10 +78,3 @@ angular
   ...
   .constant("requestTimeout", 1000)
 ```
-
-### Todo
-
-- [x] Support `value`
-- [ ] Support `functions`?
-- [ ] Should overrides defined per type (constant and a value with the same name makes
-  no sense)
