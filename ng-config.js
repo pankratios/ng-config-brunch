@@ -6,23 +6,18 @@ var fs = require('fs'),
     doT = require('dot');
 
 function NgConfigPlugin(config) {
-  // brunch properties
-  this.type = 'javascript';
-  this.extension = 'conf.json';
-
-  // internal
-  this.config = config;
+  this.brunchConfig = config || {};
+  this.config = (this.brunchConfig.plugins || {}).ngconfig || {};
   this.publicPath = config.paths.public;
+  this.env = this.brunchConfig.env || [];
   this.generate = this.compileTemplate();
   this.importedData = this.loadImportData();
-  this.env = config.env || [];
 }
 
-// brunch
 NgConfigPlugin.prototype.brunchPlugin = true;
+NgConfigPlugin.prototype.type = 'javascript';
+NgConfigPlugin.prototype.extension = 'conf.json';
 NgConfigPlugin.prototype.compile = compile;
-
-// internal
 NgConfigPlugin.prototype.getFileName = getFileName;
 NgConfigPlugin.prototype.generateModule = generateModule;
 NgConfigPlugin.prototype.merge = merge;
@@ -39,7 +34,8 @@ NgConfigPlugin.prototype.getImportName = getImportName;
 function compile(params, callback) {
   var appConfig = JSON.parse(params.data);
 
-  params.path = this.getFileName(params.path);
+  appConfig.overrides = appConfig.overrides || {};
+
   params.data = this.generateModule(appConfig);
 
   callback(null, params);
@@ -57,7 +53,7 @@ function getFileName(filePath) {
 
 function loadImportData() {
   var i = 0,
-      imports = (this.config.plugins.ngconfig || {}).imports,
+      imports = this.config.imports,
       importsCount,
       importFilePath,
       output = {};
@@ -71,11 +67,7 @@ function loadImportData() {
     }
   }
 
-  output.brunch = {
-    env: this.config.env,
-    server: this.config.server,
-    optimize: this.config.optimize
-  };
+  output.brunch = this.brunchConfig;
 
   return output;
 }
@@ -89,17 +81,21 @@ function loadJSON(path) {
 }
 
 function generateModule(config) {
-  config.constants = this.serialize(this.merge(config.constants, config));
-  config.values = this.serialize(this.merge(config.values, config));
+  config.constants = this.serialize(this.merge(config, 'constants'));
+  config.values = this.serialize(this.merge(config, 'values'));
 
   return this.generate(config);
 }
 
-function merge(values, config) {
-  var merged = values || {};
+function merge(config, type) {
+  var merged = config[type] || {},
+      envOverrides;
 
   this.env.forEach(function mergeData(env) {
-    merged = extend(merged, config[env] || {});
+    envOverrides = config.overrides[env];
+    if (envOverrides) {
+      merged = extend(merged, envOverrides[type] || {});
+    }
   });
 
   return merged;
@@ -166,30 +162,9 @@ function serializeArray(values, stringify) {
 }
 
 function serializeString(value, stringify) {
-  var importedData = this.importedData;
-
-  if (importedData) {
-    value = value.replace(/\$([^\s\.]+\.[^\$\s]+)\$/g, function (_, propertyPath) {
-      var properties = propertyPath.split('.'),
-          propertyCount = properties.length,
-          propertyValue = importedData,
-          i = 0;
-
-      for(; i < propertyCount; i = i + 1) {
-        propertyValue = propertyValue[properties[i]];
-
-        if (propertyValue === undefined) {
-          throw [
-            'The property "',
-            propertyPath,
-            '" can not be found.'
-          ].join('');
-        }
-      }
-
-      return propertyValue;
-    });
-  };
+  if (this.importedData) {
+    value = doT.template(value)(this.importedData);
+  }
 
   return stringify ? JSON.stringify(value) : value;
 }
@@ -198,13 +173,13 @@ function compileTemplate() {
   return doT.template(
     [
       'angular',
-      '.module("{{=it.moduleName}}", [',
+      '.module("{{=it.moduleName}}",[',
       '])',
-      '{{ for(var prop in it.constants) { }}',
-      '.constant("{{=prop}}", {{=it.constants[prop]}})',
+      '{{for(var prop in it.constants){}}',
+      '.constant("{{=prop}}",{{=it.constants[prop]}})',
       '{{}}}',
-      '{{ for(var prop in it.values) { }}',
-      '.value("{{=prop}}", {{=it.values[prop]}})',
+      '{{for(var prop in it.values){}}',
+      '.value("{{=prop}}",{{=it.values[prop]}})',
       '{{}}}',
       ';'
     ].join(''));
