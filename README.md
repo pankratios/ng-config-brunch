@@ -28,8 +28,8 @@ The imported data can be accessed with `{{...}}` notation.
 
 ```javascript
 {
-  "packageVersion": "{{package.version}}"
-  "bowerVersion": "{{bower.version}}"
+  "packageVersion": "{{=it.package.version}}"
+  "bowerVersion": "{{=it.bower.version}}"
 }
 ```
 
@@ -44,10 +44,10 @@ Configurations can be overriden per `environment`, `development` is the default.
 {
   "moduleName": "myApp.config",
   "values": {
-    "appName": "App name is {{bower.name}}",
+    "appName": "App name is {{=it.bower.name}}",
   },
   "constants": {
-    "appVersion": "version {{package.version}}",
+    "appVersion": "version {{=it.package.version}}",
     "requestTimeout": 3000
   },
   "overrides": {
