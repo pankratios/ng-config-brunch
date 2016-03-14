@@ -119,7 +119,7 @@ function serializeValue(value, stringify) {
     return this.serializeString(value, stringify);
   }
 
-  if(/number/.test(type)) {
+  if(/number|boolean/.test(type)) {
     return value;
   }
 

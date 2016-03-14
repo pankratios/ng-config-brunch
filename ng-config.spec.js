@@ -35,6 +35,7 @@ describe('ng-config', function () {
             string: 'test-value',
             interpolatedString: 'this \'{{=it.brunch.env}}\' from brunch config',
             array: ['string-in-array'],
+            boolean: true,
             object: {
               item: 'item-value'
             }
@@ -57,7 +58,9 @@ describe('ng-config', function () {
           'angular.module("test.config",[])',
           '.constant("string","production-test-value")',
           '.constant("interpolatedString","this \'production\' from brunch config")',
-          '.constant("array",["string-in-array"]).constant("object",{"item":"item-value"})',
+          '.constant("array",["string-in-array"])',
+          '.constant("boolean",true)',
+          '.constant("object",{"item":"item-value"})',
           '.value("testValue","test Value production");'
         ].join(''));
 
